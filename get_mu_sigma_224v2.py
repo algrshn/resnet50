@@ -8,6 +8,7 @@ import os
 
 #----------hard coded data-------------------
 preprocessed_images_folder="/media/alex/data2/"
+path_to_save="/media/alex/data1/npy/"
 N=1281167
 #--------------------------------------------
 
@@ -38,7 +39,7 @@ for i in range(N):
     img=img255/255.0
     
     
-    img224=np.zeros((224,224,3),dtype=np.float32)
+    img224=np.zeros((224,224,3),dtype=np.float16)
     
     h=img.shape[0]
     w=img.shape[1]
@@ -50,6 +51,8 @@ for i in range(N):
     blc_y=np.random.randint(low=0,high=blc_max_y+1)
     
     img224[:,:,:]=img[blc_y:(blc_y+224),blc_x:(blc_x+224),:]
+    
+    np.save(path_to_save + "X_" + str(i) + ".npy",img224)
     
     
     total_num_pixels[0]+=img224.shape[0]*img224.shape[1]
@@ -68,24 +71,10 @@ for i in range(N):
     if(i % 1000 == 0):
         print("shorter_side={}px | processing sigma | image #{}".format(args.shorter_side,i))
        
-    imgfilename=preprocessed_images_folder + str(args.shorter_side) + "/img_" +str(i)+".jpg"
     
-    img255=skimage.io.imread(imgfilename)
+    img224=np.load(path_to_save + "X_" + str(i) + ".npy")
     
-    img=img255/255.0
-    
-    img224=np.zeros((224,224,3),dtype=np.float32)
-    
-    h=img.shape[0]
-    w=img.shape[1]
-    
-    blc_max_x=w-224
-    blc_max_y=h-224
-    
-    blc_x=np.random.randint(low=0,high=blc_max_x+1)
-    blc_y=np.random.randint(low=0,high=blc_max_y+1)
-    
-    img224[:,:,:]=img[blc_y:(blc_y+224),blc_x:(blc_x+224),:]
+
        
     img_centered=img224-mu_shaped    
     img_squared=img_centered*img_centered

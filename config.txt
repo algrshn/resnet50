@@ -1,0 +1,5 @@
+[train]
+buffer_folder="/mnt/ramdisk/buffer/"
+path_for_saving="saved_models/"
+N=1281167
+buffer_size=1000

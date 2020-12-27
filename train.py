@@ -4,20 +4,23 @@ import numpy as np
 import time
 import argparse
 import sys
+import configparser
 
 import model as mdl
 import utils
 
+
+config = configparser.ConfigParser()
+config.read('config.txt')
+buffer_folder=config.get('train','buffer_folder')
+path_for_saving=config.get('train','path_for_saving')
+N=config.get('train','N')
+buffer_size=config.get('train','buffer_size')
+
 #mu=np.array([0.47703891, 0.45346393, 0.40395429])  #actual values
 #sigma=np.array([0.27914875, 0.27181716, 0.28552585])  #actual values
 
-#-------------hard coded data----------------------------
-ds_folder="/media/alex/data/npy/"
-buffer_folder="/mnt/ramdisk/buffer/"
-path_for_saving="/home/alex/ResNet/saved_models/"
-N=1281167
-buffer_size=1000
-#--------------------------------------------------------
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--run_folder',type=str)
