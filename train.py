@@ -1,5 +1,4 @@
 import tensorflow as tf
-#import tensorflow_addons as tfa
 import numpy as np
 import time
 import argparse
@@ -9,18 +8,40 @@ import configparser
 import model as mdl
 import utils
 
+#------start reading from config.txt----------------------
 
 config = configparser.ConfigParser()
 config.read('config.txt')
-buffer_folder=config.get('train','buffer_folder')
-path_for_saving=config.get('train','path_for_saving')
-N=config.get('train','N')
-buffer_size=config.get('train','buffer_size')
 
-#mu=np.array([0.47703891, 0.45346393, 0.40395429])  #actual values
-#sigma=np.array([0.27914875, 0.27181716, 0.28552585])  #actual values
+try:
+    buffer_folder=config.get('train','buffer_folder')
+except:
+    sys.exit("Check configuration file config.txt. Option buffer_folder does not exist in section [train].")
+    
+try:
+    path_for_saving=config.get('train','path_for_saving')
+except:
+    sys.exit("Check configuration file config.txt. Option path_for_saving does not exist in section [train].")
+
+try:
+    N=int(config.get('train','N'))
+except:
+    sys.exit("Check configuration file config.txt. Option N does not exist in section [train].")
+    
+try:
+    buffer_size=int(config.get('train','buffer_size'))
+except:
+    sys.exit("Check configuration file config.txt. Option buffer_size does not exist in section [train].")
+    
+try:
+    sleep_time=int(config.get('train','sleep_time'))
+except:
+    sys.exit("Check configuration file config.txt. Option sleep_time does not exist in section [train].")
+
+#-----finish reading from config.txt------------------------
 
 
+#------start reading command line arguments----------------------
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--run_folder',type=str)
@@ -28,7 +49,6 @@ parser.add_argument('--epoch_start',type=int)
 parser.add_argument('--epoch_end',type=int)
 parser.add_argument('--batch_size',type=int)
 parser.add_argument('--learning_rate',type=float)
-#parser.add_argument('--wd',type=float)
 args = parser.parse_args()
 
 if(not args.run_folder):
@@ -46,15 +66,16 @@ if(not args.batch_size):
 if(not args.learning_rate):
     sys.exit("Must specify learning_rate")
 
-# if(not args.wd):
-#     sys.exit("Must specify wd (weight_decay)")
+#------finish reading command line arguments----------------------
 
 batch_size=args.batch_size
-
 num_of_batches=N//batch_size
 
-model=mdl.Model()
 
+
+
+
+model=mdl.Model()
 
 if(args.epoch_start>0):
     path_to_saved_model=path_for_saving + args.run_folder + '/epoch' + str(args.epoch_start-1) + '/'
@@ -74,17 +95,16 @@ if(args.epoch_start>0):
     model.dense_w=loaded.dense_w
 
 opt = tf.keras.optimizers.SGD(learning_rate=args.learning_rate)
-#opt = tfa.optimizers.SGDW(learning_rate=args.learning_rate, weight_decay=args.wd, momentum=0.9)
 opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)
 
 for epoch in range(args.epoch_start,args.epoch_end):
     e_start=time.time()
     print("\n\n\nTraining epoch# {}".format(epoch))    
     
-    #for batch_num in range(10):
+
     for batch_num in range(num_of_batches):
 
-        #utils.progress(batch_num,num_of_batches-1)
+        utils.progress(batch_num,num_of_batches-1)
         
         keeptrying=1
         while keeptrying:
@@ -94,8 +114,8 @@ for epoch in range(args.epoch_start,args.epoch_end):
                 Y_batch=np.load(buffer_folder + "Y_" +str(epoch)+"_"+str(batch_num)+".npy")
             except:
                 keeptrying=1
-                print("Batch no yet available, will wait for 100sec")
-                time.sleep(100)
+                print("Batch not yet available, will wait for " + str(sleep_time) + "sec")
+                time.sleep(sleep_time)
         
         
         Xtf=tf.convert_to_tensor(X_batch,dtype=tf.dtypes.float32)

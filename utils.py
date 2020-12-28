@@ -3,6 +3,8 @@ import math
 import sys
 import os
 import glob
+import configparser
+import skimage.io
 
 
 
@@ -16,13 +18,16 @@ def progress(count, total):
     sys.stdout.write('[%s] %s%s\r' % (bar, percents, '%'))
     sys.stdout.flush()
     
-def process256(X256):
+def img2X224(imgfilename):
     
+    img_uint8=skimage.io.imread(imgfilename)
+    img=img_uint8/255.0
+        
     #crop
     img224=np.zeros((224,224,3),dtype=np.float32)
     
-    h=X256.shape[0]
-    w=X256.shape[1]
+    h=img.shape[0]
+    w=img.shape[1]
     
     blc_max_x=w-224
     blc_max_y=h-224
@@ -30,16 +35,59 @@ def process256(X256):
     blc_x=np.random.randint(low=0,high=blc_max_x+1)
     blc_y=np.random.randint(low=0,high=blc_max_y+1)
     
-    img224[:,:,:]=X256[blc_y:(blc_y+224),blc_x:(blc_x+224),:]
+    img224[:,:,:]=img[blc_y:(blc_y+224),blc_x:(blc_x+224),:]
+    
+    #linear transformation with mu and sigma
+    
+    mu_global=np.zeros((3))
+    sigma_global=np.ones((3))
+    
+    config = configparser.ConfigParser()
+    config.read('config.txt')
+    
+    try:
+        mu_global[0]=config.get('utils','mu_0')
+    except:
+        sys.exit("Check configuration file config.txt. Option mu_0 does not exist in section [utils].")
+    try:
+        mu_global[1]=config.get('utils','mu_1')
+    except:
+        sys.exit("Check configuration file config.txt. Option mu_1 does not exist in section [utils].")
+    try:
+        mu_global[2]=config.get('utils','mu_2')
+    except:
+        sys.exit("Check configuration file config.txt. Option mu_2 does not exist in section [utils].")
+    try:
+        sigma_global[0]=config.get('utils','sigma_0')
+    except:
+        sys.exit("Check configuration file config.txt. Option sigma_0 does not exist in section [utils].")
+    try:
+        sigma_global[1]=config.get('utils','sigma_1')
+    except:
+        sys.exit("Check configuration file config.txt. Option sigma_1 does not exist in section [utils].")
+    try:
+        sigma_global[2]=config.get('utils','sigma_2')
+    except:
+        sys.exit("Check configuration file config.txt. Option sigma_2 does not exist in section [utils].")
+    
+    
+    
+    mu_shaped=np.zeros((1,1,3))
+    mu_shaped[0,0,:]=mu_global[:]
+    sigma_shaped=np.ones((1,1,3))
+    sigma_shaped[0,0,:]=sigma_global[:]
+    
+    X224=(img224-mu_shaped)/sigma_shaped
+    
     
     #flip
     if(np.random.randint(2)==1):
-        img224_f=np.flip(img224,axis=1)
+        X224_f=np.flip(X224,axis=1)
     else:
-        img224_f=img224
+        X224_f=X224
 
     #color augmentation
-    I=np.reshape(img224_f,newshape=(50176,3))
+    I=np.reshape(X224_f,newshape=(50176,3))
     mu=np.mean(I,axis=0,keepdims=True)
     
     I_c=I-mu
@@ -62,12 +110,15 @@ def process256(X256):
     
     color_augmentation=alpha0*w[0]*v0+alpha1*w[1]*v1+alpha2*w[2]*v2
     
-    img_augmented=img224_f+color_augmentation
+    X224_augmented=X224_f+color_augmentation
     
-    return img_augmented
+    return X224_augmented
 
-def run_preprocessing(ds_folder, buffer_folder, shuffled_indices, epoch, batch_num, batch_size):
+def run_preprocessing(ds_location, buffer_folder, shuffled_indices, epoch, batch_num, batch_size):
     
+    config = configparser.ConfigParser()
+    config.read('config.txt')
+       
     X_batch=np.zeros((batch_size,224,224,3),dtype=np.float32)
     Y_batch=np.zeros((batch_size,1000),dtype=np.int8)
     
@@ -75,12 +126,14 @@ def run_preprocessing(ds_folder, buffer_folder, shuffled_indices, epoch, batch_n
         
         orig_index=shuffled_indices[batch_num*batch_size+j]
         
-        X256=np.load(ds_folder + "X16_" + str(orig_index) + ".npy")
-        Y=np.load(ds_folder + "Y_" + str(orig_index) + ".npy") 
+        shorter_side=256+7*np.random.randint(33)
+        imgfilename=ds_location + str(shorter_side) + "/img_" +str(orig_index)+".jpg"
+        y=np.load(ds_location + str(shorter_side) + "/y_" +str(orig_index)+".npy")
+        Y=np.zeros((1,1000),dtype=np.int64)
+        Y[0,int(y)]=1
         
         Y_batch[j,:]=Y[0,:]
-        
-        X224=process256(X256)
+        X224=img2X224(imgfilename)
                    
         X_batch[j,:,:,:]=X224[:,:,:]
     

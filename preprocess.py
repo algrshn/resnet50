@@ -8,15 +8,27 @@ import sys
 import time
 import os
 import math
+import configparser
 
-#---------hard coded paths----------------
-ImageNet_folder='/media/alex/data1/ImageNet/'
-path_to_save="/media/alex/data2/"
-#------------------------------------------
+#------start reading from config.txt----------------------
 
-df=pd.read_csv(ImageNet_folder + 'train.txt',sep=' ', header=None)
-src_folder=ImageNet_folder + "2012_train/"
+config = configparser.ConfigParser()
+config.read('config.txt')
 
+try:
+    ImageNet_folder=config.get('preprocess','ImageNet_folder')
+except:
+    sys.exit("Check configuration file config.txt. Option ImageNet_folder does not exist in section [preprocess].")
+    
+try:
+    path_to_save=config.get('preprocess','path_to_save')
+except:
+    sys.exit("Check configuration file config.txt. Option path_to_save does not exist in section [preprocess].")
+
+#-----finish reading from config.txt------------------------
+
+
+#------start reading command line arguments----------------------
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--shorter_side',type=int)
@@ -26,6 +38,13 @@ if(not args.shorter_side):
     sys.exit("Must specify shorter_side")
 else:
     shorter_side=args.shorter_side
+
+#------finish reading command line arguments----------------------
+
+    
+    
+df=pd.read_csv(ImageNet_folder + 'train.txt',sep=' ', header=None)
+src_folder=ImageNet_folder + "2012_train/"    
     
 if not os.path.exists(path_to_save + str(shorter_side)):
     os.makedirs(path_to_save + str(shorter_side))

@@ -2,21 +2,44 @@ import numpy as np
 import argparse
 import sys
 import time
+import configparser
 
 import utils
 
-#mu=np.array([0.47703891, 0.45346393, 0.40395429])  #actual values
-#sigma=np.array([0.27914875, 0.27181716, 0.28552585])  #actual values
+#------start reading from config.txt----------------------
 
-#-------------hard coded data----------------------------
-ds_folder="/media/alex/data/npy/"
-buffer_folder="/mnt/ramdisk/buffer/"
-N=1281167
-buffer_size=1000
-#buffer_size is specified in units of batch_size (e.g. with batch_size=64
-#and buffer_size=1000 the buffer will hold 64000 images)
-sleeptime=10 
-#--------------------------------------------------------
+config = configparser.ConfigParser()
+config.read('config.txt')
+
+try:
+    buffer_folder=config.get('train','buffer_folder')
+except:
+    sys.exit("Check configuration file config.txt. Option buffer_folder does not exist in section [train].")
+    
+try:
+    ds_location=config.get('preprocess','path_to_save')
+except:
+    sys.exit("Check configuration file config.txt. Option path_to_save does not exist in section [preprocess].")
+
+try:
+    N=int(config.get('train','N'))
+except:
+    sys.exit("Check configuration file config.txt. Option N does not exist in section [train].")
+    
+try:
+    buffer_size=int(config.get('train','buffer_size'))
+except:
+    sys.exit("Check configuration file config.txt. Option buffer_size does not exist in section [train].")
+    
+try:
+    sleep_time=int(config.get('runtime_preprocessing','sleep_time'))
+except:
+    sys.exit("Check configuration file config.txt. Option sleep_time does not exist in section [runtime_preprocessing].")
+
+#-----finish reading from config.txt------------------------
+
+
+#------start reading command line arguments----------------------
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--epoch_start',type=int)
@@ -33,8 +56,9 @@ if(not args.epoch_end and args.epoch_end!=0):
 if(not args.batch_size):
     sys.exit("Must specify batch_size")
     
+#------finish reading command line arguments----------------------
+    
 batch_size=args.batch_size
-
 num_of_batches=N//batch_size
 
 epoch=args.epoch_start
@@ -74,13 +98,13 @@ while keepgoing:
         if(target_preprocessing_epoch==preprocessing_epoch):
             for batch_num in range(preprocessing_batch_num,target_preprocessing_batch_num):
 
-                utils.run_preprocessing(ds_folder,buffer_folder, shuffled_indices, preprocessing_epoch, batch_num, batch_size)
+                utils.run_preprocessing(ds_location,buffer_folder, shuffled_indices, preprocessing_epoch, batch_num, batch_size)
                 
         elif(target_preprocessing_epoch==(preprocessing_epoch+1)):
             
             for batch_num in range(preprocessing_batch_num,num_of_batches):
                 
-                utils.run_preprocessing(ds_folder,buffer_folder, shuffled_indices, preprocessing_epoch, batch_num, batch_size)
+                utils.run_preprocessing(ds_location,buffer_folder, shuffled_indices, preprocessing_epoch, batch_num, batch_size)
                 
             shuffled_indices=np.random.permutation(N)
             print("Performed re-shuffling")
@@ -90,7 +114,7 @@ while keepgoing:
             else:
                 for batch_num in range(0,target_preprocessing_batch_num):
                 
-                    utils.run_preprocessing(ds_folder, buffer_folder, shuffled_indices, target_preprocessing_epoch, batch_num, batch_size)
+                    utils.run_preprocessing(ds_location, buffer_folder, shuffled_indices, target_preprocessing_epoch, batch_num, batch_size)
                 
         preprocessing_batch_num=target_preprocessing_batch_num
         preprocessing_epoch=target_preprocessing_epoch
@@ -98,7 +122,7 @@ while keepgoing:
     else:
         
         print("Waiting...")
-        time.sleep(sleeptime)
+        time.sleep(sleep_time)
             
         
     
