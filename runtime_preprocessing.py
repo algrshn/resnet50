@@ -3,6 +3,7 @@ import argparse
 import sys
 import time
 import configparser
+from multiprocessing import Pool
 
 import utils
 
@@ -35,6 +36,11 @@ try:
     sleep_time=int(config.get('runtime_preprocessing','sleep_time'))
 except:
     sys.exit("Check configuration file config.txt. Option sleep_time does not exist in section [runtime_preprocessing].")
+    
+try:
+    num_of_threads=int(config.get('runtime_preprocessing','num_of_threads'))
+except:
+    sys.exit("Check configuration file config.txt. Option num_of_threads does not exist in section [runtime_preprocessing].")
 
 #-----finish reading from config.txt------------------------
 
@@ -69,6 +75,10 @@ shuffled_indices=np.random.permutation(N)
 preprocessing_epoch=args.epoch_start
 preprocessing_batch_num=0
 
+pool_input_list=[]
+for i in range(num_of_threads):
+    pool_input_list.append(i)
+
 while keepgoing:
     
     line_num=0
@@ -96,15 +106,34 @@ while keepgoing:
             target_preprocessing_batch_num=training_batch_num+buffer_size
             
         if(target_preprocessing_epoch==preprocessing_epoch):
-            for batch_num in range(preprocessing_batch_num,target_preprocessing_batch_num):
 
-                utils.run_preprocessing(ds_location,buffer_folder, shuffled_indices, preprocessing_epoch, batch_num, batch_size)
+            # utils.run_preprocessing(ds_location,buffer_folder, shuffled_indices, preprocessing_epoch, preprocessing_batch_num, target_preprocessing_batch_num, batch_size, num_of_threads)
+            
+            try:
+                pool = Pool(num_of_threads) 
+                run_preprocessing = utils.Run_preprocessing(ds_location,buffer_folder, shuffled_indices, preprocessing_epoch, preprocessing_batch_num, target_preprocessing_batch_num, batch_size, num_of_threads)
+                pool.map(run_preprocessing, pool_input_list)
+            finally: # To make sure processes are closed in the end, even if errors happen
+                pool.close()
+                pool.join()
+            
+            
+            
                 
         elif(target_preprocessing_epoch==(preprocessing_epoch+1)):
             
-            for batch_num in range(preprocessing_batch_num,num_of_batches):
-                
-                utils.run_preprocessing(ds_location,buffer_folder, shuffled_indices, preprocessing_epoch, batch_num, batch_size)
+            # utils.run_preprocessing(ds_location,buffer_folder, shuffled_indices, preprocessing_epoch, preprocessing_batch_num, num_of_batches, batch_size, num_of_threads)
+            
+            
+            try:
+                pool = Pool(num_of_threads) 
+                run_preprocessing = utils.Run_preprocessing(ds_location,buffer_folder, shuffled_indices, preprocessing_epoch, preprocessing_batch_num, num_of_batches, batch_size, num_of_threads)
+                pool.map(run_preprocessing, pool_input_list)
+            finally: # To make sure processes are closed in the end, even if errors happen
+                pool.close()
+                pool.join()
+            
+            
                 
             shuffled_indices=np.random.permutation(N)
             print("Performed re-shuffling")
@@ -112,9 +141,15 @@ while keepgoing:
             if(target_preprocessing_epoch==args.epoch_end):
                 keepgoing=0
             else:
-                for batch_num in range(0,target_preprocessing_batch_num):
+                #utils.run_preprocessing(ds_location, buffer_folder, shuffled_indices, target_preprocessing_epoch, 0, target_preprocessing_batch_num, batch_size, num_of_threads)
                 
-                    utils.run_preprocessing(ds_location, buffer_folder, shuffled_indices, target_preprocessing_epoch, batch_num, batch_size)
+                try:
+                    pool = Pool(num_of_threads) 
+                    run_preprocessing = utils.Run_preprocessing(ds_location, buffer_folder, shuffled_indices, target_preprocessing_epoch, 0, target_preprocessing_batch_num, batch_size, num_of_threads)
+                    pool.map(run_preprocessing, pool_input_list)
+                finally: # To make sure processes are closed in the end, even if errors happen
+                    pool.close()
+                    pool.join()
                 
         preprocessing_batch_num=target_preprocessing_batch_num
         preprocessing_epoch=target_preprocessing_epoch

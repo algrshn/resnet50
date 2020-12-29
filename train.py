@@ -6,7 +6,6 @@ import sys
 import configparser
 
 import model as mdl
-import utils
 
 #------start reading from config.txt----------------------
 
@@ -104,7 +103,7 @@ for epoch in range(args.epoch_start,args.epoch_end):
 
     for batch_num in range(num_of_batches):
 
-        utils.progress(batch_num,num_of_batches-1)
+        # utils.progress(batch_num,num_of_batches-1)
         
         keeptrying=1
         while keeptrying:

@@ -11,6 +11,7 @@ sleep_time=100
 
 [runtime_preprocessing]
 sleep_time=10
+num_of_threads=3
 
 [utils]
 mu_0=0.48180

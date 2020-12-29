@@ -114,33 +114,72 @@ def img2X224(imgfilename):
     
     return X224_augmented
 
-def run_preprocessing(ds_location, buffer_folder, shuffled_indices, epoch, batch_num, batch_size):
-    
-    config = configparser.ConfigParser()
-    config.read('config.txt')
-       
-    X_batch=np.zeros((batch_size,224,224,3),dtype=np.float32)
-    Y_batch=np.zeros((batch_size,1000),dtype=np.int8)
-    
-    for j in range(batch_size):
+# def run_preprocessing(ds_location, buffer_folder, shuffled_indices, epoch, batch_num_start, batch_num_end, batch_size):
+      
+#     for batch_num in range(batch_num_start,batch_num_end):
         
-        orig_index=shuffled_indices[batch_num*batch_size+j]
-        
-        shorter_side=256+7*np.random.randint(33)
-        imgfilename=ds_location + str(shorter_side) + "/img_" +str(orig_index)+".jpg"
-        y=np.load(ds_location + str(shorter_side) + "/y_" +str(orig_index)+".npy")
-        Y=np.zeros((1,1000),dtype=np.int64)
-        Y[0,int(y)]=1
-        
-        Y_batch[j,:]=Y[0,:]
-        X224=img2X224(imgfilename)
-                   
-        X_batch[j,:,:,:]=X224[:,:,:]
+#         X_batch=np.zeros((batch_size,224,224,3),dtype=np.float32)
+#         Y_batch=np.zeros((batch_size,1000),dtype=np.int8)
     
-    print("Epoch: {} | batch_num: {}".format(epoch, batch_num))
-    
-    np.save(buffer_folder + "X16_" +str(epoch)+"_"+str(batch_num)+".npy",np.asarray(X_batch,dtype=np.float16))
-    np.save(buffer_folder + "Y_" +str(epoch)+"_"+str(batch_num)+".npy",Y_batch)
+#         for j in range(batch_size):
+            
+#             orig_index=shuffled_indices[batch_num*batch_size+j]
+            
+#             shorter_side=256+7*np.random.randint(33)
+#             imgfilename=ds_location + str(shorter_side) + "/img_" +str(orig_index)+".jpg"
+#             y=np.load(ds_location + str(shorter_side) + "/y_" +str(orig_index)+".npy")
+#             Y=np.zeros((1,1000),dtype=np.int64)
+#             Y[0,int(y)]=1
+            
+#             Y_batch[j,:]=Y[0,:]
+#             X224=img2X224(imgfilename)
+                       
+#             X_batch[j,:,:,:]=X224[:,:,:]
+        
+#         print("Epoch: {} | batch_num: {}".format(epoch, batch_num))
+        
+#         np.save(buffer_folder + "X16_" +str(epoch)+"_"+str(batch_num)+".npy",np.asarray(X_batch,dtype=np.float16))
+#         np.save(buffer_folder + "Y_" +str(epoch)+"_"+str(batch_num)+".npy",Y_batch)
+
+
+class Run_preprocessing(object):
+    def __init__(self, ds_location, buffer_folder, shuffled_indices, epoch, batch_num_start, batch_num_end, batch_size, num_of_threads):
+        self.ds_location = ds_location
+        self.buffer_folder = buffer_folder
+        self.shuffled_indices = shuffled_indices
+        self.epoch = epoch
+        self.batch_num_start = batch_num_start
+        self.batch_num_end = batch_num_end
+        self.batch_size = batch_size
+        self.num_of_threads = num_of_threads
+    def __call__(self, thread_num):
+        
+        for batch_num in range(self.batch_num_start,self.batch_num_end):
+            
+            if(batch_num % self.num_of_threads == thread_num):
+            
+                X_batch=np.zeros((self.batch_size,224,224,3),dtype=np.float32)
+                Y_batch=np.zeros((self.batch_size,1000),dtype=np.int8)
+            
+                for j in range(self.batch_size):
+                    
+                    orig_index=self.shuffled_indices[batch_num*self.batch_size+j]
+                    
+                    shorter_side=256+7*np.random.randint(33)
+                    imgfilename=self.ds_location + str(shorter_side) + "/img_" +str(orig_index)+".jpg"
+                    y=np.load(self.ds_location + str(shorter_side) + "/y_" +str(orig_index)+".npy")
+                    Y=np.zeros((1,1000),dtype=np.int64)
+                    Y[0,int(y)]=1
+                    
+                    Y_batch[j,:]=Y[0,:]
+                    X224=img2X224(imgfilename)
+                               
+                    X_batch[j,:,:,:]=X224[:,:,:]
+                
+                print("Epoch: {} | batch_num: {}".format(self.epoch, batch_num))
+                
+                np.save(self.buffer_folder + "X16_" +str(self.epoch)+"_"+str(batch_num)+".npy",np.asarray(X_batch,dtype=np.float16))
+                np.save(self.buffer_folder + "Y_" +str(self.epoch)+"_"+str(batch_num)+".npy",Y_batch)
 
     
     
