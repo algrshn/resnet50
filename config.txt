@@ -3,7 +3,8 @@ ImageNet_folder=/media/alex/data1/ImageNet/
 path_to_save=/media/alex/data2/
 
 [train]
-buffer_folder=/mnt/ramdisk/buffer/
+buffer_folder=/mnt/ramdisk/buffer_train/
+#buffer_folder=/media/alex/data2/buffer_train/
 path_for_saving=saved_models/
 N=1281167
 buffer_size=1000
