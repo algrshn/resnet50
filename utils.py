@@ -32,9 +32,13 @@ def img2X224(imgfilename, mode):
     blc_max_x=w-224
     blc_max_y=h-224
     
-    blc_x=np.random.randint(low=0,high=blc_max_x+1)
-    blc_y=np.random.randint(low=0,high=blc_max_y+1)
-    
+    if(mode=="train"):
+        blc_x=np.random.randint(low=0,high=blc_max_x+1)
+        blc_y=np.random.randint(low=0,high=blc_max_y+1)
+    elif(mode=="calc_bn_avgs"):
+        blc_x=blc_max_x//2
+        blc_y=blc_max_y//2
+        
     img224[:,:,:]=img[blc_y:(blc_y+224),blc_x:(blc_x+224),:]
     
     #linear transformation with mu and sigma
@@ -87,30 +91,34 @@ def img2X224(imgfilename, mode):
         X224_f=X224
 
     #color augmentation
-    I=np.reshape(X224_f,newshape=(50176,3))
-    mu=np.mean(I,axis=0,keepdims=True)
-    
-    I_c=I-mu
-    cov_matrix=(1/50176)*np.matmul(np.transpose(I_c),I_c)
-    
-    w,v=np.linalg.eigh(cov_matrix)
-    
-    color_augmentation=np.zeros((1,1,3))
-    
-    v0=np.zeros((1,1,3))
-    v1=np.zeros((1,1,3))
-    v2=np.zeros((1,1,3))
-    v0[0,0,:]=v[:,0]
-    v1[0,0,:]=v[:,1]
-    v2[0,0,:]=v[:,2]
-    
-    alpha0=0.1*np.random.randn()
-    alpha1=0.1*np.random.randn()
-    alpha2=0.1*np.random.randn()
-    
-    color_augmentation=alpha0*w[0]*v0+alpha1*w[1]*v1+alpha2*w[2]*v2
-    
-    X224_augmented=X224_f+color_augmentation
+    if(mode=="train"):
+        I=np.reshape(X224_f,newshape=(50176,3))
+        mu=np.mean(I,axis=0,keepdims=True)
+        
+        I_c=I-mu
+        cov_matrix=(1/50176)*np.matmul(np.transpose(I_c),I_c)
+        
+        w,v=np.linalg.eigh(cov_matrix)
+        
+        color_augmentation=np.zeros((1,1,3))
+        
+        v0=np.zeros((1,1,3))
+        v1=np.zeros((1,1,3))
+        v2=np.zeros((1,1,3))
+        v0[0,0,:]=v[:,0]
+        v1[0,0,:]=v[:,1]
+        v2[0,0,:]=v[:,2]
+        
+        alpha0=0.1*np.random.randn()
+        alpha1=0.1*np.random.randn()
+        alpha2=0.1*np.random.randn()
+        
+        color_augmentation=alpha0*w[0]*v0+alpha1*w[1]*v1+alpha2*w[2]*v2
+        
+        X224_augmented=X224_f+color_augmentation
+        
+    elif(mode=="calc_bn_avgs"):
+        X224_augmented=X224_f
     
     return X224_augmented
 
