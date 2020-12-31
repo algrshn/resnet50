@@ -21,3 +21,9 @@ mu_2=0.39839
 sigma_0=0.27336
 sigma_1=0.26435
 sigma_2=0.27563
+
+[calc_bn_avgs]
+buffer_folder=/mnt/ramdisk/buffer_bn_avgs/
+#buffer_folder=/media/alex/data2/buffer_bn_avgs/
+buffer_size=1000
+sleep_time=100

@@ -18,7 +18,7 @@ def progress(count, total):
     sys.stdout.write('[%s] %s%s\r' % (bar, percents, '%'))
     sys.stdout.flush()
     
-def img2X224(imgfilename):
+def img2X224(imgfilename, mode):
     
     img_uint8=skimage.io.imread(imgfilename)
     img=img_uint8/255.0
@@ -116,7 +116,7 @@ def img2X224(imgfilename):
 
 
 class Run_preprocessing(object):
-    def __init__(self, ds_location, buffer_folder, shuffled_indices, epoch, batch_num_start, batch_num_end, batch_size, num_of_threads):
+    def __init__(self, ds_location, buffer_folder, shuffled_indices, epoch, batch_num_start, batch_num_end, batch_size, num_of_threads, mode, iter_num=0):
         self.ds_location = ds_location
         self.buffer_folder = buffer_folder
         self.shuffled_indices = shuffled_indices
@@ -125,6 +125,8 @@ class Run_preprocessing(object):
         self.batch_num_end = batch_num_end
         self.batch_size = batch_size
         self.num_of_threads = num_of_threads
+        self.mode = mode
+        self.iter_num = iter_num
     def __call__(self, thread_num):
         
         for batch_num in range(self.batch_num_start,self.batch_num_end):
@@ -132,7 +134,8 @@ class Run_preprocessing(object):
             if(batch_num % self.num_of_threads == thread_num):
             
                 X_batch=np.zeros((self.batch_size,224,224,3),dtype=np.float32)
-                Y_batch=np.zeros((self.batch_size,1000),dtype=np.int8)
+                if(self.mode=="train"):
+                    Y_batch=np.zeros((self.batch_size,1000),dtype=np.int8)
             
                 for j in range(self.batch_size):
                     
@@ -140,19 +143,24 @@ class Run_preprocessing(object):
                     
                     shorter_side=256+7*np.random.randint(33)
                     imgfilename=self.ds_location + str(shorter_side) + "/img_" +str(orig_index)+".jpg"
-                    y=np.load(self.ds_location + str(shorter_side) + "/y_" +str(orig_index)+".npy")
-                    Y=np.zeros((1,1000),dtype=np.int64)
-                    Y[0,int(y)]=1
                     
-                    Y_batch[j,:]=Y[0,:]
-                    X224=img2X224(imgfilename)
+                    if(self.mode=="train"):
+                        y=np.load(self.ds_location + str(shorter_side) + "/y_" +str(orig_index)+".npy")
+                        Y=np.zeros((1,1000),dtype=np.int64)
+                        Y[0,int(y)]=1
+                        Y_batch[j,:]=Y[0,:]
+                    
+                    X224=img2X224(imgfilename,self.mode)
                                
                     X_batch[j,:,:,:]=X224[:,:,:]
                 
-                print("Epoch: {} | batch_num: {}".format(self.epoch, batch_num))
-                
-                np.save(self.buffer_folder + "X16_" +str(self.epoch)+"_"+str(batch_num)+".npy",np.asarray(X_batch,dtype=np.float16))
-                np.save(self.buffer_folder + "Y_" +str(self.epoch)+"_"+str(batch_num)+".npy",Y_batch)
+                if(self.mode=="train"):
+                    print("Epoch: {} | batch_num: {}".format(self.epoch, batch_num))
+                    np.save(self.buffer_folder + "X16_" +str(self.epoch)+"_"+str(batch_num)+".npy",np.asarray(X_batch,dtype=np.float16))
+                    np.save(self.buffer_folder + "Y_" +str(self.epoch)+"_"+str(batch_num)+".npy",Y_batch)
+                elif(self.mode=="calc_bn_avgs"):
+                    print("Epoch: {} | iter_num: {} | batch_num: {}".format(self.epoch, self.iter_num, batch_num))
+                    np.save(self.buffer_folder + "X16_" +str(self.epoch)+"_" +str(self.iter_num)+ "_" +str(batch_num)+".npy",np.asarray(X_batch,dtype=np.float16))
 
     
     
