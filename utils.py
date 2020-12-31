@@ -208,3 +208,34 @@ def delete_from_buffer(buffer_folder, training_epoch, training_batch_num):
             except:
                 print("Error while deleting file {}".format(filePath))
         
+def delete_from_buffer_bn_avgs(buffer_folder, calc_epoch, calc_iter_num, calc_batch_num):
+    
+    for epoch in range(0,calc_epoch):
+    
+        fileListX=glob.glob(buffer_folder+"X16_" + str(epoch) + "_*.npy")
+    
+        for filePath in fileListX:
+            try:
+                os.remove(filePath)
+            except:
+                print("Error while deleting file {}".format(filePath))
+                
+    for iter_num in range(0,calc_iter_num):
+    
+        fileListX=glob.glob(buffer_folder+"X16_" + str(calc_epoch) + "_" + str(iter_num) +"_*.npy")
+    
+        for filePath in fileListX:
+            try:
+                os.remove(filePath)
+            except:
+                print("Error while deleting file {}".format(filePath))
+                
+    for batch_num in range(0,calc_batch_num):
+    
+        fileListX=glob.glob(buffer_folder+"X16_" + str(calc_epoch) + "_" + str(calc_iter_num) +"_" + str(batch_num) +".npy")
+    
+        for filePath in fileListX:
+            try:
+                os.remove(filePath)
+            except:
+                print("Error while deleting file {}".format(filePath))
