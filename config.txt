@@ -14,6 +14,10 @@ sleep_time=100
 sleep_time=10
 num_of_threads=3
 
+[bn_avgs_preprocessing]
+sleep_time=10
+num_of_threads=3
+
 [utils]
 mu_0=0.48180
 mu_1=0.44969
@@ -27,3 +31,4 @@ buffer_folder=/mnt/ramdisk/buffer_bn_avgs/
 #buffer_folder=/media/alex/data2/buffer_bn_avgs/
 buffer_size=1000
 sleep_time=100
+num_of_iterations=4

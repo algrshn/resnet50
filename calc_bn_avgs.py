@@ -119,58 +119,6 @@ for epoch in range(args.epoch_start,args.epoch_end):
               
     e_end=time.time()
     print("\nEpoch processing time: {0:4.0f}min".format((e_end-e_start)/60))
-    
-    
-    
-    #----------Checking accuracy block----------------------------------
-    print("\nChecking accuracy")
-    
-    X_batch=np.zeros((batch_size,224,224,3),dtype=np.float32)
-    Y_batch=np.zeros((batch_size,1000),dtype=np.int8)
-    
-    shuffled_indices_val=np.random.permutation(N_val)
-        
-    corr1=tf.Variable(0)
-    corr5=tf.Variable(0)
-    for batch_num_val in range(num_of_batches_val):
-
-        utils2.progress(batch_num_val,num_of_batches_val-1)
-               
-        for j in range(batch_size):
-                    
-            orig_index=shuffled_indices_val[batch_num_val*batch_size+j]
-            
-            X256=np.load(ds_folder_val + "X16_" + str(orig_index) + ".npy")
-            Y=np.load(ds_folder_val + "Y_" + str(orig_index) + ".npy") 
-            
-            Y_batch[j,:]=Y[0,:]
-            
-            X224=utils2.process256c(X256)
-                       
-            X_batch[j,:,:,:]=X224[:,:,:]
-        
-        
-        Xtf=tf.convert_to_tensor(X_batch,dtype=tf.dtypes.float32)
-        Ytf=tf.convert_to_tensor(Y_batch,dtype=tf.dtypes.float32)
-        
-        y=tf.math.argmax(Ytf,axis=1,output_type=tf.dtypes.int32)
-        y1=tf.reshape(y,shape=[batch_size,1])
-        
-        
-        A=model(Xtf,mode='inference')
-      
-        p1=tf.math.argmax(A,axis=1,output_type=tf.dtypes.int32)
-        P5=tf.math.top_k(A,k=5)[1]
-    
-        corr1.assign_add(tf.reduce_sum(tf.cast(tf.equal(p1,y),dtype=tf.dtypes.int32)))
-        corr5.assign_add(tf.reduce_sum(tf.cast(tf.equal(P5,y1),dtype=tf.dtypes.int32)))
-
-    acc1=np.round(100*(corr1/(batch_size*num_of_batches_val)),decimals=2)
-    acc5=np.round(100*(corr5/(batch_size*num_of_batches_val)),decimals=2)
-    print('\nEpoch# {}'.format(epoch))
-    print('Top 1 accuracy: {}%'.format(acc1))
-    print('Top 5 accuracy: {}%'.format(acc5))
-    print("-------------------")
 
 
 
