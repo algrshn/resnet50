@@ -3,119 +3,115 @@ import numpy as np
 import time
 import argparse
 import sys
+import configparser
 
 import model as mdl
-import utils2
+import utils
 
-#mu=np.array([0.47703891, 0.45346393, 0.40395429])  #actual values
-#sigma=np.array([0.27914875, 0.27181716, 0.28552585])  #actual values
+#------start reading from config.txt----------------------
 
-#-------------hard coded data----------------------------
-ds_folder="/media/alex/data/npy_val/"
-path_to_saved_models="/home/alex/ResNet/saved_models/"
-N=50000
-#--------------------------------------------------------
+config = configparser.ConfigParser()
+config.read('config.txt')
+   
+try:
+    ds_folder=config.get('preprocess_val','path_to_save')
+except:
+    sys.exit("Check configuration file config.txt. Option path_to_save does not exist in section [preprocess_val].")
+
+try:
+    path_to_saved_models=config.get('train','path_for_saving')
+except:
+    sys.exit("Check configuration file config.txt. Option path_for_saving does not exist in section [train].")
+
+try:
+    N=int(config.get('preprocess_val','N'))
+except:
+    sys.exit("Check configuration file config.txt. Option N does not exist in section [preprocess_val].")
+
+#-----finish reading from config.txt------------------------
+
+
+
+#------start reading command line arguments----------------------
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--run_folder',type=str)
-parser.add_argument('--epoch_start',type=int)
-parser.add_argument('--epoch_end',type=int)
-parser.add_argument('--batch_size',type=int)
+parser.add_argument('--epoch',type=int)
 args = parser.parse_args()
 
 if(not args.run_folder):
     sys.exit("Must specify run_folder")
 
-if(not args.epoch_start and args.epoch_start!=0):
-    sys.exit("Must specify epoch_start")
-    
-if(not args.epoch_end and args.epoch_end!=0):
-    sys.exit("Must specify epoch_end")
-    
-if(not args.batch_size):
-    sys.exit("Must specify batch_size")
-    
-
-batch_size=args.batch_size
- 
-
-X_batch=np.zeros((batch_size,224,224,3),dtype=np.float32)
-Y_batch=np.zeros((batch_size,1000),dtype=np.int8)
-
-num_of_batches=N//batch_size
+if(not args.epoch and args.epoch!=0):
+    sys.exit("Must specify epoch")
+       
+#------finish reading command line arguments----------------------
 
 
-for epoch in range(args.epoch_start,args.epoch_end):
-    e_start=time.time()
-    print("\n\n\nProcessing epoch# {}".format(epoch))
-          
-    model=mdl.Model()
+e_start=time.time()
 
-    opt = tf.keras.optimizers.Adam(learning_rate=0.0)
-    opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)
-          
-    loaded = tf.saved_model.load(path_to_saved_models + args.run_folder + '/epoch' + str(epoch) + '_/')      
-    model.b_start=loaded.b_start
-    model.w_start=loaded.w_start
-    model.beta_start=loaded.beta_start
-    model.gamma_start=loaded.gamma_start
-    model.mu_start=loaded.mu_start
-    model.V_start=loaded.V_start
-    
-    model.b=loaded.b
-    model.w=loaded.w
-    model.beta=loaded.beta
-    model.gamma=loaded.gamma
-    model.mu=loaded.mu
-    model.V=loaded.V
-    
-    model.dense_b=loaded.dense_b
-    model.dense_w=loaded.dense_w 
-    
-    
-    shuffled_indices=np.random.permutation(N)
-    
-    
-    corr1=tf.Variable(0)
-    corr5=tf.Variable(0)
-    for batch_num in range(num_of_batches):
+model=mdl.Model()
 
-        utils2.progress(batch_num,num_of_batches-1)
-               
-        for j in range(batch_size):
-                    
-            orig_index=shuffled_indices[batch_num*batch_size+j]
-            
-            X256=np.load(ds_folder + "X16_" + str(orig_index) + ".npy")
-            Y=np.load(ds_folder + "Y_" + str(orig_index) + ".npy") 
-            
-            Y_batch[j,:]=Y[0,:]
-            
-            X224=utils2.process256c(X256)
-                       
-            X_batch[j,:,:,:]=X224[:,:,:]
-        
-        
-        Xtf=tf.convert_to_tensor(X_batch,dtype=tf.dtypes.float32)
-        Ytf=tf.convert_to_tensor(Y_batch,dtype=tf.dtypes.float32)
-        
-        y=tf.math.argmax(Ytf,axis=1,output_type=tf.dtypes.int32)
-        y1=tf.reshape(y,shape=[batch_size,1])
-        
-        
-        A=model(Xtf,mode='inference')
+opt = tf.keras.optimizers.Adam(learning_rate=0.0)
+opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)
+
+try:      
+    loaded = tf.saved_model.load(path_to_saved_models + args.run_folder + '/epoch' + str(args.epoch) + '_/')
+except:
+    sys.exit("Can't load the model from epoch" + str(args.epoch) + "_ folder. Most likely you haven't run calc_bn_avgs.py for epoch " + str(args.epoch) + ".")
+
       
-        p1=tf.math.argmax(A,axis=1,output_type=tf.dtypes.int32)
-        P5=tf.math.top_k(A,k=5)[1]
-    
-        corr1.assign_add(tf.reduce_sum(tf.cast(tf.equal(p1,y),dtype=tf.dtypes.int32)))
-        corr5.assign_add(tf.reduce_sum(tf.cast(tf.equal(P5,y1),dtype=tf.dtypes.int32)))
+model.b_start=loaded.b_start
+model.w_start=loaded.w_start
+model.beta_start=loaded.beta_start
+model.gamma_start=loaded.gamma_start
+model.mu_start=loaded.mu_start
+model.V_start=loaded.V_start
 
-    acc1=np.round(100*(corr1/(batch_size*num_of_batches)),decimals=2)
-    acc5=np.round(100*(corr5/(batch_size*num_of_batches)),decimals=2)
-    print('\nEpoch# {}'.format(epoch))
-    print('Top 1 accuracy: {}%'.format(acc1))
-    print('Top 5 accuracy: {}%'.format(acc5))
-    print("-------------------")
+model.b=loaded.b
+model.w=loaded.w
+model.beta=loaded.beta
+model.gamma=loaded.gamma
+model.mu=loaded.mu
+model.V=loaded.V
+
+model.dense_b=loaded.dense_b
+model.dense_w=loaded.dense_w 
+
+
+corr1=tf.Variable(0)
+corr5=tf.Variable(0)
+for i in range(N):
+
+    utils.progress(i,N-1)
+                             
+    Xnp=np.load(ds_folder + "X50_" +str(i) +".npy")
+    ynp=np.load(ds_folder + "y_" + str(i) + ".npy")
+    y=ynp[0]
+    
+    Xtf=tf.convert_to_tensor(Xnp,dtype=tf.dtypes.float32)
+    
+    A=model(Xtf,mode='inference')
+    
+    proto_tensor = tf.make_tensor_proto(A)
+    B=tf.make_ndarray(proto_tensor)
+    
+    A_avg=np.mean(B, axis=0, keepdims=False)
+    
+    b=np.argsort(A_avg, axis=0)
+    c=np.flip(b, axis=0)
+    
+    if(y==c[0]):
+        corr1+=1
+    if(y==c[0] or y==c[1] or y==c[2] or y==c[3] or y==c[4]):
+        corr5+=1
+
+
+acc1=np.round(100*(corr1/N),decimals=2)
+acc5=np.round(100*(corr5/N),decimals=2)
+print('\nEpoch# {}'.format(args.epoch))
+print('Top 1 accuracy: {}%'.format(acc1))
+print('Top 5 accuracy: {}%'.format(acc5))
+print("-------------------")
 
 

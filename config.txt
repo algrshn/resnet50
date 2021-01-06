@@ -2,6 +2,11 @@
 ImageNet_folder=/media/alex/data1/ImageNet/
 path_to_save=/media/alex/data2/
 
+[preprocess_val]
+ImageNet_folder=/media/alex/data1/ImageNet/
+path_to_save=/media/alex/data1/npy_val/
+N=50000
+
 [train]
 buffer_folder=/mnt/ramdisk/buffer_train/
 #buffer_folder=/media/alex/data2/buffer_train/
