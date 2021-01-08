@@ -14,7 +14,7 @@ a = np.array([[1,2,3],[4,5,6]])
 
 x=tf.convert_to_tensor(a,dtype=tf.dtypes.float32)
 
-proto_tensor = tf.make_tensor_proto(x)  # convert `tensor a` to a proto tensor
+proto_tensor = tf.make_tensor_proto(x)
 b=tf.make_ndarray(proto_tensor)
 
 print(b)
