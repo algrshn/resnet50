@@ -105,11 +105,10 @@ while keepgoing:
             
         if(target_preprocessing_epoch==preprocessing_epoch):
 
-            # utils.run_preprocessing(ds_location,buffer_folder, shuffled_indices, preprocessing_epoch, preprocessing_batch_num, target_preprocessing_batch_num, batch_size, num_of_threads)
             
             try:
                 pool = Pool(num_of_threads) 
-                run_preprocessing = utils.Run_preprocessing(ds_location,buffer_folder, shuffled_indices, preprocessing_epoch, preprocessing_batch_num, target_preprocessing_batch_num, batch_size, num_of_threads, mode='train')
+                run_preprocessing = utils.Run_preprocessing(ds_location,buffer_folder, shuffled_indices, preprocessing_epoch, preprocessing_batch_num, target_preprocessing_batch_num, batch_size, num_of_threads)
                 
                 
                 
@@ -123,12 +122,11 @@ while keepgoing:
                 
         elif(target_preprocessing_epoch==(preprocessing_epoch+1)):
             
-            # utils.run_preprocessing(ds_location,buffer_folder, shuffled_indices, preprocessing_epoch, preprocessing_batch_num, num_of_batches, batch_size, num_of_threads)
             
             
             try:
                 pool = Pool(num_of_threads) 
-                run_preprocessing = utils.Run_preprocessing(ds_location,buffer_folder, shuffled_indices, preprocessing_epoch, preprocessing_batch_num, num_of_batches, batch_size, num_of_threads, mode='train')
+                run_preprocessing = utils.Run_preprocessing(ds_location,buffer_folder, shuffled_indices, preprocessing_epoch, preprocessing_batch_num, num_of_batches, batch_size, num_of_threads)
                 pool.map(run_preprocessing, pool_input_list)
             finally: # To make sure processes are closed in the end, even if errors happen
                 pool.close()
@@ -142,11 +140,10 @@ while keepgoing:
             if(target_preprocessing_epoch==args.epoch_end):
                 keepgoing=0
             else:
-                #utils.run_preprocessing(ds_location, buffer_folder, shuffled_indices, target_preprocessing_epoch, 0, target_preprocessing_batch_num, batch_size, num_of_threads)
                 
                 try:
                     pool = Pool(num_of_threads) 
-                    run_preprocessing = utils.Run_preprocessing(ds_location, buffer_folder, shuffled_indices, target_preprocessing_epoch, 0, target_preprocessing_batch_num, batch_size, num_of_threads, mode='train')
+                    run_preprocessing = utils.Run_preprocessing(ds_location, buffer_folder, shuffled_indices, target_preprocessing_epoch, 0, target_preprocessing_batch_num, batch_size, num_of_threads)
                     pool.map(run_preprocessing, pool_input_list)
                 finally: # To make sure processes are closed in the end, even if errors happen
                     pool.close()

@@ -5,7 +5,6 @@ import argparse
 import sys
 import configparser
 
-import model as mdl
 import utils
 
 #------start reading from config.txt----------------------
@@ -50,35 +49,16 @@ if(not args.epoch and args.epoch!=0):
 
 e_start=time.time()
 
-model=mdl.Model()
 
 opt = tf.keras.optimizers.Adam(learning_rate=0.0)
 opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)
 
 try:      
-    loaded = tf.saved_model.load(path_to_saved_models + args.run_folder + '/epoch' + str(args.epoch) + '_/')
+    model = tf.saved_model.load(path_to_saved_models + args.run_folder + '/epoch' + str(args.epoch) + '/')
 except:
-    sys.exit("Can't load the model from epoch" + str(args.epoch) + "_ folder. Most likely you haven't run calc_bn_avgs.py for epoch " + str(args.epoch) + ".")
+    sys.exit("Can't load the model for epoch" + str(args.epoch) + ".")
 
       
-model.b_start=loaded.b_start
-model.w_start=loaded.w_start
-model.beta_start=loaded.beta_start
-model.gamma_start=loaded.gamma_start
-model.mu_start=loaded.mu_start
-model.V_start=loaded.V_start
-
-model.b=loaded.b
-model.w=loaded.w
-model.beta=loaded.beta
-model.gamma=loaded.gamma
-model.mu=loaded.mu
-model.V=loaded.V
-
-model.dense_b=loaded.dense_b
-model.dense_w=loaded.dense_w 
-
-
 corr1=tf.Variable(0)
 corr5=tf.Variable(0)
 for i in range(N):
@@ -91,12 +71,14 @@ for i in range(N):
     
     Xtf=tf.convert_to_tensor(Xnp,dtype=tf.dtypes.float32)
     
-    A=model(Xtf,mode='inference')
+    Atf=model(Xtf,mode='inference')
     
-    proto_tensor = tf.make_tensor_proto(A)
-    B=tf.make_ndarray(proto_tensor)
+    # proto_tensor = tf.make_tensor_proto(A)
+    # B=tf.make_ndarray(proto_tensor)
     
-    A_avg=np.mean(B, axis=0, keepdims=False)
+    A=Atf.numpy()
+    
+    A_avg=np.mean(A, axis=0, keepdims=False)
     
     b=np.argsort(A_avg, axis=0)
     c=np.flip(b, axis=0)
