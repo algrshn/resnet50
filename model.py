@@ -105,8 +105,8 @@ class Model(tf.Module):
             
             M_start=tf.nn.batch_normalization(Z_start,mean=mu_to_apply,variance=V_to_apply,offset=self.beta_start,scale=self.gamma_start,variance_epsilon=var_epsilon)
             
-            self.mu_start=self.moving_avgs_momentum*self.mu_start+(1-self.moving_avgs_momentum)*mu_batch
-            self.sigma_start=self.moving_avgs_momentum*self.sigma_start+(1-self.moving_avgs_momentum)*sigma_batch
+            self.mu_start.assign(self.moving_avgs_momentum*self.mu_start+(1-self.moving_avgs_momentum)*mu_batch)
+            self.sigma_start.assign(self.moving_avgs_momentum*self.sigma_start+(1-self.moving_avgs_momentum)*sigma_batch)
             
         elif(mode=='inference'):
             #M_start from Z_start, mean=mu, variance=V
@@ -142,8 +142,8 @@ class Model(tf.Module):
                         
                         L.append(tf.nn.batch_normalization(L[-1],mean=mu_to_apply, variance=V_to_apply, offset=self.beta[num], scale=self.gamma[num], variance_epsilon=var_epsilon))
                         
-                        self.mu[num]=self.moving_avgs_momentum*self.mu[num]+(1-self.moving_avgs_momentum)*mu_batch
-                        self.sigma[num]=self.moving_avgs_momentum*self.sigma[num]+(1-self.moving_avgs_momentum)*sigma_batch
+                        self.mu[num].assign(self.moving_avgs_momentum*self.mu[num]+(1-self.moving_avgs_momentum)*mu_batch)
+                        self.sigma[num].assign(self.moving_avgs_momentum*self.sigma[num]+(1-self.moving_avgs_momentum)*sigma_batch)
                         
                         
                     elif(mode=='inference'):
