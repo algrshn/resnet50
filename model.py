@@ -168,9 +168,6 @@ class Model(tf.Module):
         Z=self.dense_b+tf.matmul(P,self.dense_w)
         A=tf.nn.softmax(Z)
         
-        if(mode=='calc_bn_avgs'):
-            self.curr_num_of_record_steps.assign_add(1.0)    
-        
         return A
     
     @tf.function

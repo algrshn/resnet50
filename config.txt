@@ -21,10 +21,10 @@ sleep_time=100
 moving_avgs_momentum=0.9999
 rmax_max=3.0
 dmax_max=5.0
-start_relaxing_rmax=20000
-reach_rmax_max=100000
-start_relaxing_dmax=20000
-reach_dmax_max=100000
+start_relaxing_rmax=60000
+reach_rmax_max=140000
+start_relaxing_dmax=60000
+reach_dmax_max=140000
 
 [runtime_preprocessing]
 sleep_time=10

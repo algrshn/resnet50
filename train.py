@@ -70,12 +70,35 @@ if(not args.learning_rate):
 batch_size=args.batch_size
 num_of_batches=N//batch_size
 
+model=mdl.Model()
 
 if(args.epoch_start>0):
     path_to_saved_model=path_for_saving + args.run_folder + '/epoch' + str(args.epoch_start-1) + '/'
-    model = tf.saved_model.load(path_to_saved_model)
-elif(args.epoch_start==0):
-    model=mdl.Model()
+    loaded = tf.saved_model.load(path_to_saved_model)
+    
+    model.b=loaded.b
+    model.w=loaded.w
+    model.beta=loaded.beta
+    model.gamma=loaded.gamma
+    
+    model.b_start=loaded.b_start
+    model.w_start=loaded.w_start
+    model.beta_start=loaded.beta_start
+    model.gamma_start=loaded.gamma_start
+            
+    model.dense_b=loaded.dense_b
+    model.dense_w=loaded.dense_w
+            
+    model.mu_start=loaded.mu_start
+    model.sigma_start=loaded.sigma_start
+    
+    model.mu=loaded.mu
+    model.sigma=loaded.sigma
+    
+    model.train_step_num=loaded.train_step_num
+    model.rmax=loaded.rmax
+    model.dmax=loaded.dmax
+       
 
 opt = tf.keras.optimizers.SGD(learning_rate=args.learning_rate)
 opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)

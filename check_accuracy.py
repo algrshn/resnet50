@@ -5,6 +5,7 @@ import argparse
 import sys
 import configparser
 
+import model as mdl
 import utils
 
 #------start reading from config.txt----------------------
@@ -54,13 +55,38 @@ opt = tf.keras.optimizers.Adam(learning_rate=0.0)
 opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)
 
 try:      
-    model = tf.saved_model.load(path_to_saved_models + args.run_folder + '/epoch' + str(args.epoch) + '/')
+    loaded = tf.saved_model.load(path_to_saved_models + args.run_folder + '/epoch' + str(args.epoch) + '/')
 except:
     sys.exit("Can't load the model for epoch" + str(args.epoch) + ".")
 
-      
-corr1=tf.Variable(0)
-corr5=tf.Variable(0)
+model=mdl.Model()
+
+model.b=loaded.b
+model.w=loaded.w
+model.beta=loaded.beta
+model.gamma=loaded.gamma
+
+model.b_start=loaded.b_start
+model.w_start=loaded.w_start
+model.beta_start=loaded.beta_start
+model.gamma_start=loaded.gamma_start
+        
+model.dense_b=loaded.dense_b
+model.dense_w=loaded.dense_w
+        
+model.mu_start=loaded.mu_start
+model.sigma_start=loaded.sigma_start
+
+model.mu=loaded.mu
+model.sigma=loaded.sigma
+
+model.train_step_num=loaded.train_step_num
+model.rmax=loaded.rmax
+model.dmax=loaded.dmax
+
+     
+corr1=0
+corr5=0
 for i in range(N):
 
     utils.progress(i,N-1)
@@ -72,10 +98,7 @@ for i in range(N):
     Xtf=tf.convert_to_tensor(Xnp,dtype=tf.dtypes.float32)
     
     Atf=model(Xtf,mode='inference')
-    
-    # proto_tensor = tf.make_tensor_proto(A)
-    # B=tf.make_ndarray(proto_tensor)
-    
+       
     A=Atf.numpy()
     
     A_avg=np.mean(A, axis=0, keepdims=False)
