@@ -1,4 +1,5 @@
 import tensorflow as tf
+#import tensorflow_addons as tfa
 import numpy as np
 import time
 import argparse
@@ -100,9 +101,9 @@ if(args.epoch_start>0):
     model.dmax=loaded.dmax
        
 
-learning_rate_schedule = tf.keras.optimizers.schedules.PiecewiseConstantDecay([400180,800360,1400630,2000900], [0.1,0.01,0.001,0.0001,0.00001])
+#learning_rate_schedule = tf.keras.optimizers.schedules.PiecewiseConstantDecay([400180,800360,1400630,2000900], [0.1,0.01,0.001,0.0001,0.00001])
 
-opt = tf.keras.optimizers.SGD(learning_rate=learning_rate_schedule, momentum=0.9)
+opt = tf.keras.optimizers.SGD(learning_rate=args.learning_rate, momentum=0.9)
 opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)
 
 for epoch in range(args.epoch_start,args.epoch_end):
