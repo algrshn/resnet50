@@ -86,7 +86,7 @@ class Model(tf.Module):
         self.dense_w=tf.Variable(tf.random.uniform(shape=[dense_size,1000],minval=-tf.math.sqrt(tf.cast(6/(dense_size+1000),dtype=tf.dtypes.float32)),maxval=tf.math.sqrt(tf.cast(6/(dense_size+1000),dtype=tf.dtypes.float32))))
         
         
-    @tf.function   
+    #@tf.function   
     def __call__(self,X,mode='train'):
         
         var_epsilon=0.001
@@ -174,7 +174,7 @@ class Model(tf.Module):
         
         return A
     
-    @tf.function
+    #@tf.function
     def loss(self,X,Y):
         
         beta=0.00001
@@ -229,7 +229,7 @@ class Model(tf.Module):
         self.rmax.assign(rmax)
         self.dmax.assign(dmax)
         
-    @tf.function
+    #@tf.function
     def get_mu_and_V(self,sigma_moving,mu_moving,sigma_batch,mu_batch):
         
         r=tf.stop_gradient(tf.clip_by_value(sigma_batch/sigma_moving, 1/self.rmax, self.rmax))
