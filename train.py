@@ -39,7 +39,7 @@ except:
     sys.exit("Check configuration file config.txt. Option sleep_time does not exist in section [train].")
     
 try:
-    sgd_momentum=int(config.get('train','sgd_momentum'))
+    sgd_momentum=float(config.get('train','sgd_momentum'))
 except:
     sys.exit("Check configuration file config.txt. Option sgd_momentum does not exist in section [train].")
 
