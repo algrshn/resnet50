@@ -26,6 +26,8 @@ class Model(tf.Module):
             sys.exit("Check configuration file config.txt. Option l2_penalty is missing in section [l2].")
         #-----finish reading from config.txt------------------------
         
+        self.J_l2=tf.Variable(0.0, dtype=tf.dtypes.float32)
+        
         self.train_step_num=tf.Variable(0.0, dtype=tf.dtypes.float32)
         self.rmax=tf.Variable(1.0, dtype=tf.dtypes.float32)
         self.dmax=tf.Variable(0.0, dtype=tf.dtypes.float32)
@@ -86,7 +88,7 @@ class Model(tf.Module):
         self.dense_w=tf.Variable(tf.random.uniform(shape=[dense_size,1000],minval=-tf.math.sqrt(tf.cast(6/(dense_size+1000),dtype=tf.dtypes.float32)),maxval=tf.math.sqrt(tf.cast(6/(dense_size+1000),dtype=tf.dtypes.float32))))
         
         
-    #@tf.function   
+    @tf.function   
     def __call__(self,X,mode='train'):
         
         var_epsilon=0.001
@@ -174,7 +176,7 @@ class Model(tf.Module):
         
         return A
     
-    #@tf.function
+    @tf.function
     def loss(self,X,Y):
         
         beta=0.00001
@@ -184,15 +186,15 @@ class Model(tf.Module):
         YTA=tf.matmul(tf.transpose(Y),tf.math.log((1-beta)*A+beta))
         J=(-1/N)*tf.linalg.trace(YTA)
         
-        J_l2=tf.Variable(0.0, dtype=tf.dtypes.float32)
-        J_l2.assign_add(tf.math.reduce_sum(self.w_start*self.w_start))
-        J_l2.assign_add(tf.math.reduce_sum(self.dense_w*self.dense_w))
+        self.J_l2.assign(0.0)
+        self.J_l2.assign_add(tf.math.reduce_sum(self.w_start*self.w_start))
+        self.J_l2.assign_add(tf.math.reduce_sum(self.dense_w*self.dense_w))
         
         for conv_w in self.w:
-            J_l2.assign_add(tf.math.reduce_sum(conv_w*conv_w))
+            self.J_l2.assign_add(tf.math.reduce_sum(conv_w*conv_w))
             
         
-        return J+(self.l2_penalty/2)*J_l2
+        return J+(self.l2_penalty/2)*self.J_l2
     
     @tf.function    
     def train_step(self,opt,X,Y):
@@ -229,7 +231,7 @@ class Model(tf.Module):
         self.rmax.assign(rmax)
         self.dmax.assign(dmax)
         
-    #@tf.function
+    @tf.function
     def get_mu_and_V(self,sigma_moving,mu_moving,sigma_batch,mu_batch):
         
         r=tf.stop_gradient(tf.clip_by_value(sigma_batch/sigma_moving, 1/self.rmax, self.rmax))
