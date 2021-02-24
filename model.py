@@ -19,7 +19,11 @@ class Model(tf.Module):
             self.start_relaxing_dmax=int(config.get('batch_renorm','start_relaxing_dmax'))
             self.reach_dmax_max=int(config.get('batch_renorm','reach_dmax_max'))       
         except:
-            sys.exit("Check configuration file config.txt. At least one required option is missing in section [batch_renorm].")        
+            sys.exit("Check configuration file config.txt. At least one required option is missing in section [batch_renorm].")
+        try:
+            self.l2_penalty=float(config.get('l2','l2_penalty'))     
+        except:
+            sys.exit("Check configuration file config.txt. Option l2_penalty is missing in section [l2].")
         #-----finish reading from config.txt------------------------
         
         self.train_step_num=tf.Variable(0.0, dtype=tf.dtypes.float32)
@@ -180,7 +184,15 @@ class Model(tf.Module):
         YTA=tf.matmul(tf.transpose(Y),tf.math.log((1-beta)*A+beta))
         J=(-1/N)*tf.linalg.trace(YTA)
         
-        return J
+        J_l2=tf.Variable(0.0, dtype=tf.dtypes.float32)
+        J_l2.assign_add(tf.math.reduce_sum(self.w_start*self.w_start))
+        J_l2.assign_add(tf.math.reduce_sum(self.dense_w*self.dense_w))
+        
+        for conv_w in self.w:
+            J_l2.assign_add(tf.math.reduce_sum(conv_w*conv_w))
+            
+        
+        return J+(self.l2_penalty/2)*J_l2
     
     @tf.function    
     def train_step(self,opt,X,Y):

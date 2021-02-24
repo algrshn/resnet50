@@ -37,6 +37,11 @@ try:
     sleep_time=int(config.get('train','sleep_time'))
 except:
     sys.exit("Check configuration file config.txt. Option sleep_time does not exist in section [train].")
+    
+try:
+    sgd_momentum=int(config.get('train','sgd_momentum'))
+except:
+    sys.exit("Check configuration file config.txt. Option sgd_momentum does not exist in section [train].")
 
 #-----finish reading from config.txt------------------------
 
@@ -103,7 +108,7 @@ if(args.epoch_start>0):
 
 #learning_rate_schedule = tf.keras.optimizers.schedules.PiecewiseConstantDecay([400180,800360,1400630,2000900], [0.1,0.01,0.001,0.0001,0.00001])
 
-opt = tf.keras.optimizers.SGD(learning_rate=args.learning_rate, momentum=0.9)
+opt = tf.keras.optimizers.SGD(learning_rate=args.learning_rate, momentum=sgd_momentum)
 opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)
 
 for epoch in range(args.epoch_start,args.epoch_end):

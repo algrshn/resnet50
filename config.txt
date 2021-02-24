@@ -14,6 +14,7 @@ path_to_save=/media/alex/data1/npy/
 buffer_folder=/mnt/ramdisk/buffer/
 path_for_saving=saved_models/
 N=1281167
+sgd_momentum=0.9
 buffer_size=1000
 sleep_time=100
 
@@ -37,3 +38,6 @@ mu_2=0.39839
 sigma_0=0.27336
 sigma_1=0.26435
 sigma_2=0.27563
+
+[l2]
+l2_penalty=0.0005
