@@ -135,7 +135,9 @@ for epoch in range(args.epoch_start,args.epoch_end):
         Xtf=tf.convert_to_tensor(X_batch,dtype=tf.dtypes.float32)
         Ytf=tf.convert_to_tensor(Y_batch,dtype=tf.dtypes.float32)
         
-        model.train_step(opt,Xtf,Ytf)
+        J_full, J = model.train_step(opt,Xtf,Ytf)
+        
+        print("Full loss: {0:4.4f} | Main loss: {1:4.4f}".format(J_full, J))
         
         if(batch_num % (buffer_size//5) ==0):
             with open("training_progress.txt",'w') as fo:

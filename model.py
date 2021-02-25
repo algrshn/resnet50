@@ -194,12 +194,12 @@ class Model(tf.Module):
             self.J_l2.assign_add(tf.math.reduce_sum(conv_w*conv_w))
             
         
-        return J+(self.l2_penalty/2)*self.J_l2
+        return J+(self.l2_penalty/2)*self.J_l2, J
     
     @tf.function    
     def train_step(self,opt,X,Y):
 
-        current_loss=lambda: self.loss(X,Y)
+        current_loss=lambda: self.loss(X,Y)[0]
         varslist = self.b + self.w + self.beta + self.gamma
         
         varslist.append(self.w_start)
@@ -230,6 +230,11 @@ class Model(tf.Module):
             
         self.rmax.assign(rmax)
         self.dmax.assign(dmax)
+        
+        J_full=self.loss(X,Y)[0]
+        J=self.loss(X,Y)[1]
+        
+        return J_full, J
         
     @tf.function
     def get_mu_and_V(self,sigma_moving,mu_moving,sigma_batch,mu_batch):
