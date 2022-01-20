@@ -43,4 +43,4 @@ If the trained model for a particular epoch is not available yet (possible if ch
 
 ### Configuration file
 
-Here is a walkthrough for the configuration file config.txt.
+Here is a walk-through for the configuration file config.txt.
