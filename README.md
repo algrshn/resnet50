@@ -30,3 +30,13 @@ The command line arguments are self explanatory. The script will create the firs
 $ python3 train.py --run_folder=mytestrun --epoch_start=0 --epoch_end=30 --batch_size=64 --learning_rate=0.01
 ```
 On completion of each epoch the script will be saving the trained model in a numbered subfolder of mytestrun folder inside saved_models (after epoch 0 it will be saved to saved_models/mytestrun/0/). Note that the batch size specified for training must be the same as for preprocessing. To resume training from a saved checkpoint (saved automatically on completion of each epoch), specify --epoch_start > 0.
+
+### Checking accuracy on the validation set
+
+To check accuracy on the validation set for a range of epochs run:
+
+```
+$ python3 check_accuracy.py --run_folder=mytestrun --epoch_start=0 --epoch_end=30
+```
+
+If a trained model for a particular epoch is not available yet (check_accuracy.py is run concurrently with train.py but on a different GPU), the script will wait until it becomes available. When making predictions on the validation set we re-size the image so the shortest side is 256px, then we generate predictions for 10 different versions of the image: crops from each corner, crop from the center, plus horozontal flips of all the crops. The final prediction is the average of predictions on 10 versions.
