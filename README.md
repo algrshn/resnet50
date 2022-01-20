@@ -40,3 +40,7 @@ $ python3 check_accuracy.py --run_folder=mytestrun --epoch_start=0 --epoch_end=3
 ```
 
 If the trained model for a particular epoch is not available yet (possible if check_accuracy.py is run concurrently with train.py but on a different GPU), the script will wait until it becomes available. When making predictions on the validation set we re-size the image so the shortest side is 256px, then we generate predictions for 10 different versions of the image: crops from each corner, crop from the center, plus horizontal flips of all the crops. The final prediction is the average of predictions on 10 versions. We skip the color augmentation step.
+
+### Configuration file
+
+Here is a walkthrough for the configuration file config.txt.
