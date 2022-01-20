@@ -24,3 +24,9 @@ First we run the preprocessing script:
 ```
 $ python3 runtime_preprocessing.py --epoch_start=0 --epoch_end=30 --batch_size=64
 ```
+The command line arguments are self explanatory. The script will create the first buffer_size number of batches and then it will be waiting. Next we run the train script in a separate terminal:
+
+```
+$ python3 train.py --run_folder=mytestrun --epoch_start=0 --epoch_end=30 --batch_size=64 --learning_rate=0.01
+```
+On completion of each epoch the script will be saving the trained model in a numbered subfolder of mytestrun folder inside saved_models (after epoch 0 it will be saved to saved_models/mytestrun/0/). Note that the batch size specified for training must be the same as for preprocessing. To resume training from a saved checkpoint (saved automatically on completion of each epoch), specify --epoch_start > 0.
