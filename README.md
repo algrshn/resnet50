@@ -17,7 +17,7 @@ The preprocessing steps above have to be done for each image before the image ca
 
 I implemented a preprocessing script runtime_preprocessing.py, whose task is to follow the progress of the training script \(training is performed by a separate script\) and maintain an up-do-date buffer of numpy .npy files each of which corresponds to a particular batch number. The preprocessing script periodically reads information on current state of training progress from the text file training_progress.txt and then either does some preprocessing to prepare more batches (which it saves to disk in numpy format) or deletes files from the buffer which are no longer required (if the training process already used them) or both of the above or none. After the preprocessing script does what needs to be done at the moment, it checks whether its services are required again (if the training progressed far enough and buffer needs updating). If not, it goes to sleep for a period of time controlled by the sleep_time parameter in the runtime_preprocessing section of config.txt (I set this to 10 seconds). The preprocessing script will not prepare more than a certain number of batch files in advance, with this number being controlled by the parameter buffer_size in the train section of config.txt (I set this to 1000). If the preprocessing script checks the training progress and determines that the training script still has more than 80% of the maximum buffer size to process, then it does nothing. If less, it deletes old batch files that are no longer needed and then refills the buffer to its maximum size. The preprocessing script uses multiple threads (each batch formed by a particular thread), with the number of threads controlled by the parameter num_of_threads in the runtime_preprocessing section of config.txt (I set this to 3). The training script train.py simply reads numpy files from the buffer folder (I set this up in RAM memory for my training; using SSD would also be fine, just avoid HDD - read/write times for HDD are terrible), converts them to tensors and proceeds with training. If the training script doesn't see the files it needs (meaning they were not yet prepared by the preprocessing script), it goes to sleep for a period of time controlled by the sleep_time parameter in the train section of config.txt (I set this to 100 seconds). If preprocessing parameters are tuned well, the training script will never have to wait.
 
-Here is an example of how to run preprocessing and training.
+Here is an example of how to run runtime preprocessing and training.
 
 First we run the preprocessing script:
 
@@ -30,6 +30,16 @@ The command line arguments are self explanatory. The script will create the firs
 $ python3 train.py --run_folder=mytestrun --epoch_start=0 --epoch_end=30 --batch_size=64 --learning_rate=0.01
 ```
 On completion of each epoch the script will be saving the trained model in a numbered subfolder of mytestrun folder inside saved_models (after epoch 0 it will be saved to saved_models/mytestrun/0/). Note that the batch size specified for training must be the same as for preprocessing. To resume training from a saved checkpoint (saved automatically on completion of each epoch), specify --epoch_start > 0.
+
+### Performing step 2 of preprocessing in advance instead of runtime
+
+As stated above, the step 2 of the pre-processing procedure is to re-size an image so the shortest side is equal to the integer chosen at step 1 \(integers from 256 to 480 with step 7\). As re-sizing takes significant time, one might want to prepare 33 folders with re-sized images in advance, before training \(that's the strategy I used\). An alternative would be to ramp up number of workers (if enough CPU cores are availble) to brute force your way through the botteleneck. If you choose the former approach \(this is recommended, and would not require code modifications however trivial\), run preprocess.py script \(not to be confused with runtime_preprocessing.py\) before training with different command line arguments corresponding to different re-sizings:
+
+```
+$ python3 preprocess.py --shorter_side=256
+```
+
+This preprocess script will have to be run in advance, before training can start, for each value of shorter_side \(integers from 256 to 480 with step 7\)
 
 ### Checking accuracy on the validation set
 
@@ -44,3 +54,5 @@ If the trained model for a particular epoch is not available yet (possible if ch
 ### Configuration file
 
 Here is a walk-through for the configuration file config.txt.
+
+### Results
