@@ -119,4 +119,4 @@ l2_penalty - L2 penalty<br /><br />
 
 Here is the plot of validation set accuracies (Top5 and Top1) as a function of epoch number:
 
-<img src='imgs_for_readme/learning_curves.png' alt='Results plot' height="600" />
+<img src='imgs_for_readme/learning_curves.png' alt='Results plot' height="480" />
