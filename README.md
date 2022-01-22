@@ -64,7 +64,7 @@ path_to_save - path to where folders with re-sized images will be placed \(named
 
 ImageNet_folder - path to the original ImageNet folder<br />
 path_to_save - path to where preprocess_val.py script will be storing .npy files corresponding to all 10 versions of validation set images<br />
-N - number of images in the validation set (50000)
+N - number of images in the validation set \(50000\)
 
 ##### Section \[get_mu_sigma\]
 
@@ -72,6 +72,47 @@ path_to_save - path where the script get_mu_sigma.py (the script calculating mea
 
 ##### Section \[train\]
 
+buffer_folder - path where the training script will be getting batches from \(runtime preprocessing script will be writing to this folder\)<br />
+path_for_saving - path where trained models will be saved to<br />
+N - number of images in the train set \(1281167\)<br />
+sgd_momentum - SGD momentum<br />
+buffer_size - buffer size used by the train and runtime preprocessing scripts \(explained above\)<br />
+sleep_time - for how long should the train script wait before checking again if the next batch is not available \(explained above\)<br />
 
+##### Section \[batch_renorm\]
+
+Note, the code uses batch renormalization instead of regular batch norm.
+
+Parameters:
+
+moving_avgs_momentum<br />
+rmax_max<br />
+dmax_max<br />
+start_relaxing_rmax<br />
+reach_rmax_max<br />
+start_relaxing_dmax<br />
+reach_dmax_max<br />
+
+##### Section \[runtime_preprocessing\]
+
+sleep_time - sleep time for runtime preprocessing script (as explained above)
+num_of_threads - number of threads for runtime preprocessing script (as explained above)
+
+##### Section \[utils\]
+
+This section contains values of mean and standard deviation for the normalizing procedure \(step 4 of runtime preprocessing\). The values are obtain by running the script get_mu_sigma.py.
+
+Parameters:
+
+mu_0<br />
+mu_1<br />
+mu_2<br />
+sigma_0<br />
+sigma_1<br />
+sigma_2<br />
+
+##### Section \[l2\]
+
+l2_penalty - L2 penalty
 
 ### Results
