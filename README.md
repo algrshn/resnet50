@@ -57,13 +57,13 @@ Here is a walk-through for the configuration file config.txt.
 
 ##### Section \[preprocess\]
 
-**ImageNet_folder** - path to the original ImageNet folder<br />
-**path_to_save** - path to where folders with re-sized images will be placed \(named 256, 263, 270, 277, etc...\)
+ImageNet_folder - path to the original ImageNet folder<br />
+path_to_save - path to where folders with re-sized images will be placed \(named 256, 263, 270, 277, etc...\)
 
 ##### Section \[preprocess_val\]
 
-ImageNet_folder - path to the original ImageNet folder
-path_to_save - path to where preprocess_val.py script will be storing .npy files corresponding to all 10 versions of validation set images
+ImageNet_folder - path to the original ImageNet folder<br />
+path_to_save - path to where preprocess_val.py script will be storing .npy files corresponding to all 10 versions of validation set images<br />
 N - number of images in the validation set (50000)
 
 ##### Section \[get_mu_sigma\]
