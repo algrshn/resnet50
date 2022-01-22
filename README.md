@@ -29,7 +29,7 @@ The command line arguments are self explanatory. The script will create the firs
 ```
 $ python3 train.py --run_folder=mytestrun --epoch_start=0 --epoch_end=30 --batch_size=64 --learning_rate=0.01
 ```
-On completion of each epoch the script will be saving the trained model in a numbered subfolder of mytestrun folder inside saved_models (after epoch 0 it will be saved to saved_models/mytestrun/0/). Note that the batch size specified for training must be the same as for preprocessing. To resume training from a saved checkpoint (saved automatically on completion of each epoch), specify --epoch_start > 0.
+On completion of each epoch the script will be saving the trained model in a numbered subfolder of mytestrun folder inside saved_models (after epoch 0 it will be saved to saved_models/mytestrun/0/). Note that the batch size specified for training must be the same as for preprocessing. To resume training from a saved checkpoint (saved automatically on completion of each epoch), specify --epoch_start > 0.<br /><br />
 
 ### Performing step 2 of preprocessing in advance instead of runtime
 
@@ -39,7 +39,7 @@ As stated above, the step 2 of the pre-processing procedure is to re-size an ima
 $ python3 preprocess.py --shorter_side=256
 ```
 
-This preprocess script will have to be run in advance, before training can start, for each value of shorter_side \(integers from 256 to 480 with step 7\)
+This preprocess script will have to be run in advance, before training can start, for each value of shorter_side \(integers from 256 to 480 with step 7\).<br /><br />
 
 ### Checking accuracy on the validation set
 
@@ -49,7 +49,7 @@ To check accuracy on the validation set for a range of epochs run:
 $ python3 check_accuracy.py --run_folder=mytestrun --epoch_start=0 --epoch_end=30
 ```
 
-If the trained model for a particular epoch is not available yet (possible if check_accuracy.py is run concurrently with train.py but on a different GPU), the script will wait until it becomes available. When making predictions on the validation set we re-size the image so the shortest side is 256px, then we generate predictions for 10 different versions of the image: crops from each corner, crop from the center, plus horizontal flips of all the crops. The final prediction is the average of predictions on 10 versions. We skip the color augmentation step.
+If the trained model for a particular epoch is not available yet (possible if check_accuracy.py is run concurrently with train.py but on a different GPU), the script will wait until it becomes available. When making predictions on the validation set we re-size the image so the shortest side is 256px, then we generate predictions for 10 different versions of the image: crops from each corner, crop from the center, plus horizontal flips of all the crops. The final prediction is the average of predictions on 10 versions. We skip the color augmentation step.<br /><br />
 
 ### Configuration file
 
@@ -113,6 +113,6 @@ sigma_2<br />
 
 ##### Section \[l2\]
 
-l2_penalty - L2 penalty
+l2_penalty - L2 penalty<br /><br />
 
 ### Results
