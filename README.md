@@ -33,7 +33,7 @@ On completion of each epoch the script will be saving the trained model in a num
 
 ### Performing step 2 of preprocessing in advance instead of runtime
 
-As stated above, the step 2 of the pre-processing procedure is to re-size an image so the shortest side is equal to the integer chosen at step 1 \(integers from 256 to 480 with step 7\). As re-sizing takes significant time, one might want to prepare 33 folders with re-sized images in advance, before training \(that's the strategy I used\). An alternative would be to ramp up number of workers (if enough CPU cores are availble) to brute force your way through the botteleneck. If you choose the former approach \(this is recommended, and would not require code modifications however trivial\), run preprocess.py script \(not to be confused with runtime_preprocessing.py\) before training with different command line arguments corresponding to different re-sizings:
+As stated above, the step 2 of the pre-processing procedure is to re-size an image so the shortest side is equal to the integer chosen at step 1 \(integers from 256 to 480 with step 7\). As re-sizing takes significant time, one might want to prepare 33 folders with re-sized images in advance, before training \(that's the strategy I used\). An alternative would be to ramp up number of workers (if enough CPU cores are availble) to brute force your way through the bottleneck. If you choose the former approach \(this is recommended, and would not require code modifications however trivial\), run preprocess.py script \(not to be confused with runtime_preprocessing.py\) before training with different command line arguments corresponding to different re-sizings:
 
 ```
 $ python3 preprocess.py --shorter_side=256
