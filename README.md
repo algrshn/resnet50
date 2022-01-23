@@ -95,8 +95,8 @@ reach_dmax_max<br />
 
 ##### Section \[runtime_preprocessing\]
 
-sleep_time - sleep time for runtime preprocessing script (as explained above)
-num_of_threads - number of threads for runtime preprocessing script (as explained above)
+sleep_time - sleep time for runtime preprocessing script (as explained above)<br />
+num_of_threads - number of threads for runtime preprocessing script (as explained above)<br />
 
 ##### Section \[utils\]
 
