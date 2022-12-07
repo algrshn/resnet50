@@ -1,5 +1,7 @@
 # Coding ResNet-50 from scratch and training it on ImageNet
 
+Originally published on [*my site*](https://alexgrishin.ai/coding-resnet-50-from-scratch-and-training-it-on-imagenet).
+
 This is a pure training exercise. I wanted to build a relatively large CNN from scratch without making any use of anybody else's code. I also wanted to learn how to handle training on a relatively large dataset.<br /><br />
 
 ### Preprocessing data and training the model
